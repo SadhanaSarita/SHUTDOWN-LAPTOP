@@ -1,0 +1,46 @@
+#mediapipe-21 landmarks-each finger 4 landmarks*5 and one at center of our palm.
+
+import cv2 
+import mediapipe as mp 
+import os 
+#used kyunki ham system based command kar rahe hai execute yaha par
+
+def count_fingers(hand_landmarks):
+    finger_tips = [8, 12, 16, 20]
+    finger_pips = [6, 10, 14, 18]
+    
+    count = 0
+    for tip, pip in zip(finger_tips, finger_pips):
+        if hand_landmarks.landmark[tip].y < hand_landmarks.landmark[pip].y:
+            count += 1 
+    
+    return count
+
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+cap = cv2.VideoCapture(0) 
+while cap.isOpened():
+    success, frame = cap.read()
+    if not success:
+        break
+    frame = cv2.flip(frame, 1)s
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = hands.process(rgb_frame)
+    
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            if count_fingers(hand_landmarks) == 0:
+#if we are showing a fist or not
+                os.system("shutdown /s /t 5")  # Shutdown in 5 seconds
+#while/s means shutdown 
+                break
+#if fist has been detected then don't detect any further hands
+    
+    cv2.imshow("SHUTDWON AT FIST", frame)
+    if cv2.waitKey(1) & 0xFF == ord('S'):
+
+    break
+
+cap.release()
+cv2.destroyAllWindows()
+
